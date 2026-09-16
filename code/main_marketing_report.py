@@ -29,24 +29,38 @@ import sys
 # `main_finance_report.py` is your worked example for anything structural.
 
 # TODO: import what this report needs from the package.
+from sales_pipeline import (
+    get_raw_sales_data,
+    clean_sales_data,
+    summarize_by_item,
+    find_top_entry,
+    print_item_table,
+)
 
 
 # TODO: handle the optional dataset seed. This is the same three lines the Finance
 #       report has — read them there, then write them here yourself.
 
+seed = None
+if len(sys.argv) > 1 and sys.argv[1].strip() != "":
+    seed = int(sys.argv[1])
 
-# TODO: print the header, exactly:   === MARKETING: Revenue by Item ===
-#       then a blank line.
 
+print("=== MARKETING: Revenue by Item ===")
+print()
 
 # 1. Extract — the same source Finance uses, called the same way.
-# TODO
 
+raw_data = get_raw_sales_data(seed)
 
 # 2. Transform — clean the rows, roll them up to one entry per item, then find the
 #    best entry twice: once by "revenue", once by "units_sold". They are usually
 #    different products, which is the whole reason Marketing asked.
-# TODO
+
+clean_data = clean_sales_data(raw_data)
+itemized_data = summarize_by_item(clean_data)
+top_revenue_item = find_top_entry(itemized_data, "revenue")
+top_units_item = find_top_entry(itemized_data, "units_sold")
 
 
 # 3. Load — the item table, a blank line, then two headline lines. Match this
@@ -54,4 +68,8 @@ import sys
 #
 #        Top seller by revenue: Gizmo Pro ($1,200.00)
 #        Top seller by units:   Widget C (15 units)
-# TODO
+print_item_table(itemized_data)
+print()
+print()
+print("Top seller by revenue: {} (${:,.2f})".format(top_revenue_item["item"], top_revenue_item["revenue"]))
+print("Top seller by units:   {} ({:d} units)".format(top_units_item["item"], top_units_item["units_sold"]))

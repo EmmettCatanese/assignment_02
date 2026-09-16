@@ -39,3 +39,44 @@ Before running:  pip install -r requirements.txt
 # The rules have not changed: no arithmetic and no formatting logic in a report. If
 # you need a calculation this file cannot get by calling the package, the
 # calculation belongs in sales_pipeline/transform.py.
+
+import sys
+
+from sales_pipeline import (
+    calculate_total_revenue,
+    clean_sales_data,
+    find_top_entry,
+    get_raw_sales_data,
+    print_day_table,
+    summarize_by_day,
+)
+
+seed = None
+if len(sys.argv) > 1 and sys.argv[1].strip() != "":
+    seed = int(sys.argv[1])
+
+print("=== OPERATIONS: Sales by Day ===")
+print()
+
+# 1. Extract — the same source the other two reports use.
+raw_data = get_raw_sales_data(seed)
+
+# 2. Transform — clean the rows, roll them up by date, then rank the days twice.
+clean_data = clean_sales_data(raw_data)
+day_summary = summarize_by_day(clean_data)
+total_revenue = calculate_total_revenue(clean_data)
+busiest_by_revenue = find_top_entry(day_summary, "revenue")
+busiest_by_units = find_top_entry(day_summary, "units_sold")
+
+# 3. Load — the day table, then the three headline lines.
+print_day_table(day_summary)
+print()
+print(f"Total Revenue:          ${total_revenue:,.2f}")
+print(
+    f"Busiest day by revenue: {busiest_by_revenue['date']} "
+    f"(${busiest_by_revenue['revenue']:,.2f})"
+)
+print(
+    f"Busiest day by units:   {busiest_by_units['date']} "
+    f"({busiest_by_units['units_sold']} units)"
+)
